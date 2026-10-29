@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporte Troquelado y Bobinado PR/01-9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* La pantalla copia la hoja en papel PR/01-9: mismas secciones, mismo orden y mismas casillas. */
+:root {
+  --bg: #eceeec;
+  --sheet: #ffffff;
+  --ink: #1d2422;
+  --muted: #5d6865;
+  --rule: #9aa3a0;
+  --head: #e9eeec;
+  --field: #f6fbfb;
+  --field-line: #c9d6d4;
+  --auto: #dcefef;
+  --accent: #0b6e72;
+  --accent-ink: #ffffff;
+  --ok: #1f7a3a;
+  --ok-soft: #e1f2e5;
+  --warn: #9a5b00;
+  --warn-soft: #fbefd9;
+  --bad: #b3261e;
+  --bad-soft: #fbe3e1;
+  --sample: #7a4fb0;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101413; --sheet: #1a201f; --ink: #e6ebe9; --muted: #9aa6a2; --rule: #4a5653; --head: #232b2a; --field: #151a19; --field-line: #34403e; --auto: #173332;
+    --accent: #4fb8bb; --accent-ink: #0b1414; --ok: #6fcf8a; --ok-soft: #173222; --warn: #f0b252; --warn-soft: #362a14; --bad: #ff8a80; --bad-soft: #3a1c1a; --sample: #b993ea;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101413; --sheet: #1a201f; --ink: #e6ebe9; --muted: #9aa6a2; --rule: #4a5653; --head: #232b2a; --field: #151a19; --field-line: #34403e; --auto: #173332;
+  --accent: #4fb8bb; --accent-ink: #0b1414; --ok: #6fcf8a; --ok-soft: #173222; --warn: #f0b252; --warn-soft: #362a14; --bad: #ff8a80; --bad-soft: #3a1c1a; --sample: #b993ea;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.35; padding: 16px 16px 48px; }
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 16px; }
+.scroll { overflow-x: auto; }
+.hoja { background: var(--sheet); border: 1px solid var(--rule); box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 18px; min-width: 1040px; display: grid; gap: 12px; }
+
+/* Encabezado de la hoja */
+.titulo { display: grid; grid-template-columns: 120px 1fr 190px; align-items: stretch; border: 1px solid var(--rule); }
+.logo img { width: 100%; max-width: 110px; height: auto; padding: 4px; }
+.logo { display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 1.25rem; letter-spacing: .08em; color: var(--accent); border-right: 1px solid var(--rule); }
+.titulo h1 { margin: 0; display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; letter-spacing: .01em; text-align: center; padding: 10px; }
+.codigo { border-left: 1px solid var(--rule); font-size: .82rem; padding: 6px 10px; display: grid; align-content: center; gap: 1px; }
+
+/* Tablas con forma de hoja */
+table.t { width: 100%; border-collapse: collapse; table-layout: fixed; }
+table.t th, table.t td { border: 1px solid var(--rule); padding: 0; height: 34px; vertical-align: middle; }
+table.t th { background: var(--head); font-weight: 600; font-size: .86rem; padding: 3px 6px; text-align: center; }
+table.t th.l, table.t td.l { text-align: left; }
+table.t td.lbl { font-size: .84rem; padding: 3px 6px; line-height: 1.15; }
+table.t td.n { text-align: center; font-family: var(--f-num); font-size: .85rem; color: var(--muted); }
+table.t td.calc { text-align: right; font-family: var(--f-num); font-weight: 500; padding: 3px 8px; background: var(--head); }
+table.t td.calc.big { font-size: 1.05rem; font-weight: 600; }
+.sec { background: var(--ink) !important; color: var(--sheet); text-transform: uppercase; letter-spacing: .08em; font-family: var(--f-display); font-size: .95rem !important; height: 30px; }
+
+/* Casillas para escribir */
+td input, td select, td textarea { width: 100%; height: 100%; min-height: 32px; border: 0; border-bottom: 1px solid var(--field-line); background: var(--field); color: var(--ink); font: inherit; padding: 4px 7px; border-radius: 0; }
+td input[type=number] { text-align: right; font-family: var(--f-num); }
+td input:focus, td select:focus, td textarea:focus { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--sheet); }
+td input.auto, td .autotxt { background: var(--auto); }
+td .autotxt { min-height: 32px; height: 100%; display: flex; align-items: center; padding: 4px 7px; font-size: .9rem; line-height: 1.15; }
+td input.has { background: var(--warn-soft); font-weight: 600; }
+.uwrap { position: relative; display: block; height: 100%; }
+.uwrap::after { content: attr(data-u); position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: .7rem; font-weight: 600; color: var(--muted); pointer-events: none; }
+span.uwrap input { padding-right: 2.7em; }
+span.uwrap[data-u="m/min"] input, span.uwrap[data-u="cajas"] input { padding-right: 3.9em; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+.aviso { font-size: .88rem; padding: 6px 10px; border-left: 4px solid var(--muted); background: var(--head); }
+.aviso.bad { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+.aviso.warn { border-color: var(--warn); background: var(--warn-soft); color: var(--warn); }
+.aviso.ok { border-color: var(--accent); background: var(--auto); }
+.prod { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 12px; align-items: start; }
+.pill { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 1px 8px; border-radius: 99px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+textarea#obs { min-height: 64px; resize: vertical; }
+
+/* Revisión y guardar */
+.pie { background: var(--sheet); border: 1px solid var(--rule); padding: 14px 18px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+@media (max-width: 720px) { .pie { grid-template-columns: 1fr; } }
+ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .92rem; }
+ul.checks li::before { content: "●"; margin-right: 8px; }
+ul.checks li.ok::before { color: var(--ok); } ul.checks li.warn::before { color: var(--warn); } ul.checks li.bad::before { color: var(--bad); }
+ul.checks li.bad { color: var(--bad); font-weight: 600; }
+button { font: inherit; font-weight: 600; border-radius: 6px; border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); padding: 8px 14px; cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-size: 1.05rem; padding: 12px 26px; }
+button.small { font-size: .85rem; padding: 5px 10px; }
+.listo { background: var(--ok-soft); border: 1px solid var(--ok); padding: 18px; display: grid; gap: 10px; }
+.listo h2 { margin: 0; color: var(--ok); font-family: var(--f-display); }
+.muted { color: var(--muted); font-size: .88rem; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--sheet); padding: 10px 16px; border-radius: 6px; font-weight: 600; z-index: 9; }
+.asis table { width: 100%; border-collapse: collapse; } .asis th, .asis td { border-bottom: 1px solid var(--rule); padding: 5px 8px; text-align: left; font-size: .9rem; }
+.copybox { width: 100%; min-height: 90px; font-family: var(--f-num); font-size: .78rem; }
+.barra { display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap; background: var(--head); border: 1px solid var(--rule); padding: 10px 14px; }
+button.borrar { border-color: var(--bad); color: var(--bad); }
+button.borrar.confirmar { background: var(--bad); color: var(--sheet); }
+input[readonly] { background: var(--head); color: var(--ink); cursor: default; }
+.footer { display: flex; gap: 10px; justify-content: flex-end; align-items: center; flex-wrap: wrap; } .footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="listo" id="listo" hidden>
+    <h2>Reporte guardado</h2>
+    <p id="listoTxt" style="margin:0"></p>
+    <p id="listoForms" style="margin:0;font-weight:600" hidden>Se abrió el formulario de envío: revisa que esté lleno y pulsa <b>Enviar</b>. Si no se abrió, usa el botón de abajo.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="btnForms" hidden>Abrir formulario de envío</button><button type="button" class="primary" id="btnOtro">Llenar otro reporte</button></div>
+  </section>
+
+  <form id="frm" autocomplete="off" class="wrap" style="gap:16px">
+    <div class="barra">
+      <span>Antes de empezar, revisa que la hoja esté en blanco.</span>
+      <button type="button" class="borrar" id="btnNuevo">Borrar todo y empezar en blanco</button>
+    </div>
+    <div class="scroll">
+    <div class="hoja">
+      <div class="titulo">
+        <div class="logo"><img src="data:image/png;base64,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" alt="ETIMET"></div>
+        <h1>REPORTE DE PRODUCCIÓN TROQUELADO Y BOBINADO</h1>
+        <div class="codigo"><span>Código: PR/01-9</span><span>Fecha: abril/2026</span><span>Rev: 0</span></div>
+      </div>
+
+      <!-- Encabezado: mismas casillas y posiciones que la hoja -->
+      <table class="t">
+        <colgroup><col style="width:6%"><col style="width:10%"><col style="width:6%"><col style="width:21%"><col style="width:8%"><col style="width:7%"><col style="width:7%"><col style="width:8%"><col style="width:6%"><col style="width:21%"></colgroup>
+        <tr>
+          <th>Fecha</th><td><input id="fecha" type="date" required></td>
+          <th>Máquina</th><td><select id="maquina" required></select></td>
+          <th>Orden de Producción</th><td><input id="op" inputmode="numeric" placeholder="Ej. 7237" required></td>
+          <th>Medida Material</th><td><input id="medida" readonly tabindex="-1" placeholder="Se completa al enviar"></td>
+          <th>Producto</th><td><input id="des" readonly tabindex="-1" placeholder="Se completa al enviar"></td>
+        </tr>
+        <tr>
+          <th>Turno</th><td><select id="turno"><option value="DIA|12">Día · 12 h</option><option value="NOCHE|12">Noche · 12 h</option><option value="DIA|8">Día · 8 h</option><option value="NOCHE|8">Noche · 8 h</option></select></td>
+          <th>Operador</th><td colspan="3"><select id="operador" required></select></td>
+          <th>Velocidad Real</th><td><input id="velocidad" data-u="m/min" type="number" min="0" step="1"></td>
+          <th>Cliente</th><td><div class="autotxt" id="cliente"></div></td>
+        </tr>
+      </table>
+      <table class="t" style="width:72%">
+        <tr>
+          <th>Inicio Set Up</th><td><input id="setupIni" type="time"></td>
+          <th>Fin Set Up</th><td><input id="setupFin" type="time"></td>
+          <th>Hora Inicio</th><td><input id="horaIni" type="time" required></td>
+          <th>Hora Fin</th><td><input id="horaFin" type="time" required></td>
+        </tr>
+      </table>
+      <div class="aviso" id="producto">Escribe el número de la OP. El producto, el cliente y la medida se completan solos al enviar.</div>
+      <datalist id="listaOps"></datalist>
+
+      <!-- Tiempos improductivos: 6 pares Causa/Tiempo por fila, como en la hoja -->
+      <table class="t">
+        <colgroup><col><col style="width:7.2%"><col><col style="width:7.2%"><col><col style="width:7.2%"><col><col style="width:7.2%"><col><col style="width:7.2%"><col><col style="width:7.2%"><col style="width:7%"></colgroup>
+        <tr><th class="sec" colspan="13">Tiempos improductivos</th></tr>
+        <tr><th>Causa</th><th>Tiempo</th><th>Causa</th><th>Tiempo</th><th>Causa</th><th>Tiempo</th><th>Causa</th><th>Tiempo</th><th>Causa</th><th>Tiempo</th><th>Causa</th><th>Tiempo</th><th>TOTAL</th></tr>
+        <tbody id="causasTiempo"></tbody>
+      </table>
+
+      <!-- Producción + Balance -->
+      <div class="prod">
+        <table class="t">
+          <colgroup><col style="width:22%"><col style="width:16%"><col style="width:9%"><col style="width:22%"><col style="width:9%"><col style="width:22%"></colgroup>
+          <tr><th class="sec" colspan="6">Producción</th></tr>
+          <tr><th colspan="2">BOBINAS MADRE</th><th colspan="2">Rollos Hijos</th><th colspan="2">Rollos Hijos</th></tr>
+          <tr><th>Código ID</th><th>Metros</th><th>Cant. Rll</th><th>Metros</th><th>Cant. Rll</th><th>Metros</th></tr>
+          <tbody id="produccion"></tbody>
+        </table>
+        <div style="display:grid; gap:12px">
+          <table class="t">
+            <tr><th class="sec" colspan="2">Totales</th></tr>
+            <tr><th class="l">Rollos Hijo</th><td><input id="totRollos" data-u="rollos" type="number" min="0" step="1" inputmode="numeric"></td></tr>
+            <tr><th class="l">Metros</th><td><input id="totMetros" data-u="m" type="number" min="0" step="1" inputmode="numeric"></td></tr>
+            <tr><th class="l">Cajas</th><td><input id="cajas" data-u="cajas" type="number" min="0" step="1"></td></tr>
+          </table>
+          <table class="t">
+            <colgroup><col style="width:52%"><col></colgroup>
+            <tr><th class="sec" colspan="2">Balance <span class="pill ok" id="balPill">Cuadra</span></th></tr>
+            <tr><th></th><th>Metros</th></tr>
+            <tr><td class="lbl">Recibido</td><td><input id="balRec" data-u="m" type="number" min="0" step="1"></td></tr>
+            <tr><td class="lbl">Producido</td><td><input id="balProd" data-u="m" type="number" min="0" step="1"></td></tr>
+            <tr><td class="lbl">Desperdicio</td><td><input id="balDesp" data-u="m" type="number" min="0" step="1"></td></tr>
+            <tr><td class="lbl">Sobrante</td><td><input id="sobrante" data-u="m" type="number" min="0" step="1"></td></tr>
+            <tr><td class="lbl"><b>Total</b></td><td><input id="balTot" data-u="m" type="number" min="0" step="1"></td></tr>
+            <tr><th colspan="2">Detalle devolución de MP a la BMP</th></tr>
+            <tr><td colspan="2" style="height:auto"><input id="devolucion"></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Desperdicio / scrap: 4 grupos Causa/m por fila, como en la hoja -->
+      <table class="t">
+        <colgroup><col><col style="width:10%"><col><col style="width:10%"><col><col style="width:10%"><col><col style="width:10%"><col style="width:9%"></colgroup>
+        <tr><th class="sec" colspan="9">Desperdicio / Scrap</th></tr>
+        <tr><th>Causa</th><th>m</th><th>Causa</th><th>m</th><th>Causa</th><th>m</th><th>Causa</th><th>m</th><th>TOTAL</th></tr>
+        <tbody id="causasScrap"></tbody>
+      </table>
+
+      <table class="t">
+        <colgroup><col style="width:12%"><col></colgroup>
+        <tr><th class="l">Observaciones</th><td style="height:auto"><textarea id="obs"></textarea></td></tr>
+      </table>
+    </div>
+    </div>
+
+    <!-- Hoja 2 del formato -->
+    <div class="scroll">
+    <div class="hoja">
+      <div class="titulo">
+        <div class="logo"><img src="data:image/png;base64,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" alt="ETIMET"></div>
+        <h1>REGISTRO DE MONITOREO</h1>
+        <div class="codigo"><span>Código: PR/01-9</span><span>Fecha: abril/2026</span><span>Rev: 0</span></div>
+      </div>
+      <table class="t" id="tablaMon">
+        <colgroup><col style="width:9.5%"><col style="width:8.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:6%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5%"><col style="width:5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5%"><col style="width:5%"><col></colgroup>
+        <tr><th rowspan="2">Hora Muestreo</th><th rowspan="2">Operador</th><th colspan="5">MEDIDAS</th><th colspan="3">APARIENCIA</th><th colspan="6">TERMINACIONES</th><th rowspan="2">Observaciones</th></tr>
+        <tr><th>Avance</th><th>Ancho</th><th>Gap Avance</th><th>Gap Ancho</th><th>Corte Marca Corte</th><th>Laminado (SI/NO)</th><th>Barniz (SI/NO)</th><th>Acabados (SI/NO)</th><th>Registro (SI/NO)</th><th>Impresión (SI/NO)</th><th>Troquelado / Prepicado (SI/NO)</th><th>Sentido de Bobinado</th><th>Corte Recto (SI/NO)</th><th>Defectos (SI/NO)</th></tr>
+        <tbody id="monitoreo"></tbody>
+      </table>
+      <div><button type="button" class="small" id="btnMon">Agregar fila de muestreo</button></div>
+    </div>
+    </div>
+
+    <div class="pie">
+      <ul class="checks" id="checks"></ul>
+      <button class="primary" type="submit" id="btnGuardar">Guardar reporte</button>
+    </div>
+  </form>
+
+  <div id="vistaAsistente" class="asis" hidden>
+  <section class="pie" style="grid-template-columns:1fr" id="guardados">
+    <h2 style="margin:0">Vista del asistente · reportes guardados en esta PC <small id="nGuardados"></small></h2>
+    <p class="muted" style="margin:0">El operador no ve esta parte. Cada reporte también se guarda como archivo en la carpeta Reportes y de ahí pasa solo al Excel.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Fecha</th><th>Jornada</th><th>Máquina</th><th>OP</th><th>Operador</th><th>Metros</th><th>Scrap m</th><th></th></tr></thead>
+        <tbody id="tblGuardados"></tbody>
+      </table>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <button type="button" class="primary" id="btnCopiar">Copiar filas para BASE INDICADORES</button>
+      <button type="button" id="btnDescargar">Descargar Excel</button>
+    </div>
+    <textarea class="copybox" id="copyFallback" hidden readonly></textarea>
+    <p class="muted" id="catInfo" style="margin:0"></p>
+  </section>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="config.js"></script>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const CAT = window.CATALOGOS || { ops: {}, operadores: [] };
+
+// Columnas X..AQ de BASE INDICADOR TROQ REB, en el orden del Excel. Las 18 primeras están en la hoja,
+// en el mismo orden de lectura (fila por fila). Las 2 últimas existen en BASE pero no en la hoja: quedan en 0.
+const TIEMPOS = ["Cambio de trabajo","Empates","Falla de troquelado","Corte de Kores","Variación de media","Capacitaciones","Cambio rollos madre","Falla de materia Prima","Limpieza de máquina","Mantenimiento","Empacado y Etiquetado","Cambio de turno","Cambio rollos hijos","Falla de impresión","Fallas y cambios de los troqueles","Falta de material","Aprob. Calidad","Alimentación","Falla de sentido en bobinado","Parada no programada"];
+const TIEMPOS_HOJA = 18;
+// Columnas AR..BG, mismo orden de lectura que la hoja.
+const SCRAP = ["Cambio trabajo","Aprobaciones Calidad","Falla materia prima","Falla prepicado","Falla impresión","Falla troquelado","Refile","Calibraciones","Cambio rollos","Empates","Troquel","Variación de Medida","Contaminación","Mantenimiento","Falla Bobinado","Corte de Energía"];
+// Valor = nombre que usa BASE INDICADORES; texto = nombre completo que ve el operador.
+const MAQUINAS = [["TR 1","Troqueladora rotativa DK-320 - 1 (TR 1)"],["TR 2","Troqueladora rotativa DK-320 - 2 (TR 2)"],["TR 3","Troqueladora rotativa DK-320 - 3 (TR 3)"],["TR 4","Troqueladora rebobinadora Wurtemberg 450 - 4 (TR 4)"],["TR PLANA 1","Troqueladora plana Chanzen 320 - 1 (TR PLANA 1)"],["TR PLANA 2","Troqueladora plana MQ-320AI - 2 (TR PLANA 2)"],["TR LASER","Troqueladora Golden Laser (TR LASER)"],["REBOBINADORA 1","Rebobinadora DBFQ-330B - 1"],["REBOBINADORA 2","Rebobinadora DBFQ-330B - 2"],["REBOBINADORA ROLLOS TERMICOS 1","Cort. reb. de rollos térmicos - 1"],["REBOBINADORA ROLLOS TERMICOS 2","Cort. reb. de rollos térmicos - 2"],["IMPRESORA ROLLOS TERMICOS","Impresora cort. reb. rollos térmicos"],["CORTADORA TERMOENCOGIBLE","Cortadora de manga termoencogible"],["FORMADORA TERMOENCOGIBLE","Formadora de manga termoencogible"],["EMPACADORA","Empacadora"]];
+// Lista de personal que entregó May (13-oct-2026): [nombre como está en BASE OPERADOR, máquina o área, iniciales].
+const PERSONAL = [["MORETA NAVARRETE ALEX XAVIER", "Asis. Prod.", "MA"], ["ALCIVAR BRAVO CARLOS ALFREDO", "Alistamiento", "AC"], ["GUERRERO BARCIA LUIS FERNANDO", "Alistamiento", "GL"], ["GUAITA GUANOLUISA DARIO JAVIER", "Prensa Digital", "DG"], ["TITUAÑA SANCHEZ JUAN FRANCISCO", "Weigang", "TJ"], ["VALDOSPINO MORA JOFFRE ARIEL", "Weigang", "VA"], ["LOPEZ IMBACUAN MILTON ERNESTO", "Depai 450", "LM"], ["PRADO AVILA HAMILTON BENIGNO", "Depai 450", "PH"], ["MOROCHO CANTUÑA JOSE ANDRES", "Mark Andy 2101", "MJO"], ["COLLAGUAZO QUILUMBA FREDDY FERNANDO", "Mark Andy 2101", "FC"], ["CEDEÑO RODRIGUEZ ELIAS MANUEL", "Sprint 450 8C", "CE"], ["DELGADO CALDERON WALTER ARTURO", "Sprint 450 8C", "DW"], ["CONFORME DE LA CRUZ ALBERTO PASCUAL", "Imp. Rollos Térmicos", "CA"], ["ANGULO BENAVIDES KEVIN GABRIEL", "Imp. Rollos Térmicos", "AK"], ["CACHIPUENDO AMANTA CRISTOPHER XAVIER", "Troq. Plana 1", "CC"], ["SIMBAÑA VEGA WILMER MIGUEL", "Troq. Plana 1", "SM"], ["JIMA MORQUEACHO JONATHAN FABRICIO", "Troq. Plana 1", "JJ"], ["VILLALOBOS GONZALEZ MILTON WLADIMIR", "Troq. Plana 2", "MV"], ["PINTO CALDERON BRYAN STEVEN", "Troq. Rotativa 1", "PB"], ["LOPEZ GUALLO DIEGO GEOVANNY", "Troq. Rotativa 1", "GG"], ["VALAREZO CANDO MARCOS ELIAS", "Troq. Rotativa 2", "VM"], ["ORTIZ LARA JUAN CARLOS", "Troq. Rotativa 2", "OJC"], ["SEMANATE LASLUISA MILTON RAUL", "Troq. Rotativa 3", "SP"], ["JARA CENTENO DIEGO ALEXANDER", "Troq. Rotativa 3", "JD"], ["DUEÑAS HERRERA STALIN JONATHA", "Troq. Rotativa 4", "DS"], ["CRUZ CHISAGUANO EDWIN STEVEN", "Troq. Rotativa 4", "EC"], ["TRONCOSO RODRIGUEZ EDISON ROBERTO", "Troq. Láser", "TE"], ["PILCO TITUAÑA JIMMY CHAYAN", "Rebobinadora 2", "PJ"], ["YANEZ ESPAÑA CARLOS WILFRIDO", "Rebobinadora 1", "YC"], ["MUGMAL MUGMAL KEVIN ROBERTO", "Rebobinadora 1", "MK"], ["SIMBAÑA VEGA WILLIAM ROLANDO", "Reb. R. Térmicos 1", "SW"], ["ALVARADO CERDA NESTOR WILBER", "Reb. R. Térmicos 1", "AN"], ["HERRERA CASTILLO JOSE FERNANDO", "Reb. R. Térmicos 2", "HJ"], ["ROCHA DELGADO RICARDO RAMIRO", "Reb. R. Térmicos 2", "RR"], ["CISNEROS FIGUEROA MANUEL FELIPE", "Cortadora M.P. 1", "CM"], ["BATTA PINTO KEYSMER JOSE", "Cortadora M.P. 2", "BK"], ["SIMBAÑA VEGA JAIME ULISES", "(no figura en Personal de Calidad)", "SJ"]];
+const FILAS_PROD = 8; // 8 bobinas madre y 16 rollos hijos, como en la hoja
+const MON_CAMPOS = ["hora","operador","avance","ancho","gapAv","gapAn","corteMarca","laminado","barniz","acabados","registro","impresion","troquelado","sentido","corteRecto","defectos","obs"];
+const SINO = new Set(["laminado","barniz","acabados","registro","impresion","troquelado","corteRecto","defectos"]);
+const FILAS_MON = 6;
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
+};
+const valorOper = ([n, , ini]) => ini || "N:" + n;
+const nombreOper = new Map([...CAT.operadores, ...PERSONAL.map(p => [valorOper(p), p[0]])]);
+const inicialOper = v => v && !v.startsWith("N:") ? v : "";
+
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3200); }
+const num = v => { const n = parseFloat(String(v ?? "").replace(",", ".")); return isFinite(n) ? n : 0; };
+const fmt = n => Math.round(n).toLocaleString("es-EC");
+const hoy = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+// Desplegable agrupado por máquina, en el orden de la lista de personal.
+// Solo nombres, en orden alfabético (sin agrupar por máquina).
+const opcionesOper = '<option value=""></option>' + [...PERSONAL].sort((a, b) => a[0].localeCompare(b[0], "es")).map(p => `<option value="${valorOper(p)}">${p[0]}</option>`).join("");
+
+// ---------- construir la hoja ----------
+$("maquina").innerHTML = '<option value="">Elegir…</option>' + MAQUINAS.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+$("operador").innerHTML = opcionesOper.replace('<option value=""></option>', '<option value="">Elegir…</option>');
+
+$("causasTiempo").innerHTML = [0, 1, 2].map(f => "<tr>" +
+  [0, 1, 2, 3, 4, 5].map(c => { const i = f * 6 + c; return `<td class="lbl">${TIEMPOS[i]}</td><td><input id="t${i}" data-u="min" type="number" min="0" step="1" inputmode="numeric" aria-label="${TIEMPOS[i]} (min)"></td>`; }).join("") +
+  (f === 0 ? `<td class="calc big" rowspan="3" id="totParo">0</td>` : "") + "</tr>").join("");
+
+$("causasScrap").innerHTML = [0, 1, 2, 3].map(f => "<tr>" +
+  [0, 1, 2, 3].map(c => { const i = f * 4 + c; return `<td class="lbl">${SCRAP[i]}</td><td><input id="sm${i}" data-u="m" type="number" min="0" step="1" aria-label="${SCRAP[i]} (m)"></td>`; }).join("") +
+  (f === 0 ? `<td class="calc big" rowspan="4" id="totScrap">0</td>` : "") + "</tr>").join("");
+
+$("produccion").innerHTML = Array.from({ length: FILAS_PROD }, (_, k) => `<tr>
+  <td><input id="bc${k}" aria-label="Bobina madre ${k + 1} código ID"></td><td><input id="bm${k}" data-u="m" type="number" min="0" step="1" aria-label="Bobina madre ${k + 1} metros"></td>
+  <td class="n">${k + 1}</td><td><input id="hm${k}" data-u="m" type="number" min="0" step="1" aria-label="Rollo ${k + 1} metros"></td>
+  <td class="n">${k + 9}</td><td><input id="hm${k + 8}" data-u="m" type="number" min="0" step="1" aria-label="Rollo ${k + 9} metros"></td></tr>`).join("");
+
+let nMon = 0;
+function addMon(v = {}) {
+  const i = nMon++;
+  const tr = document.createElement("tr");
+  tr.innerHTML = MON_CAMPOS.map(c => {
+    const id = `m${i}_${c}`;
+    if (SINO.has(c)) return `<td><select id="${id}"><option></option><option>SI</option><option>NO</option></select></td>`;
+    if (c === "hora") return `<td><input id="${id}" type="time"></td>`;
+    if (c === "operador") return `<td><select id="${id}">${opcionesOper}</select></td>`;
+    if (c === "sentido") return `<td><select id="${id}"><option></option>${[1,2,3,4,5,6,7,8].map(n => `<option>${n}</option>`).join("")}</select></td>`;
+    return `<td><input id="${id}"></td>`;
+  }).join("");
+  $("monitoreo").appendChild(tr);
+  MON_CAMPOS.forEach(c => { if (v[c] != null) $(`m${i}_${c}`).value = v[c]; });
+}
+$("btnMon").onclick = () => addMon({ operador: $("operador").value });
+
+function unidades(root = document) {
+  root.querySelectorAll("input[data-u]").forEach(i => {
+    if (i.parentElement.classList.contains("uwrap")) return;
+    const w = document.createElement("span"); w.className = "uwrap"; w.dataset.u = i.dataset.u;
+    i.replaceWith(w); w.appendChild(i);
+  });
+}
+
+function fillDatalist() {
+  const ops = Object.keys(CAT.ops).sort((a, b) => num(b) - num(a));
+  $("listaOps").innerHTML = ops.map(op => `<option value="${op}">${(CAT.ops[op][1] || "").slice(0, 70)}</option>`).join("");
+  $("catInfo").textContent = `Lista de OPs: ${ops.length.toLocaleString("es-EC")} OPs.`;
+}
+
+function buscarOP(op) {
+  op = String(op || "").trim();
+  const c = CAT.ops[op];
+  if (!op || !c) return null;
+  const r = { op };
+  (CAT.campos || ["cod", "des"]).forEach((k, i) => r[k] = c[i] ?? "");
+  return r;
+}
+
+// Producto y medida vienen del reporte del sistema: el operador no los escribe (el flujo los completa siempre).
+function pintarProducto() {
+  const r = buscarOP($("op").value), box = $("producto");
+  $("des").value = r?.des || "";
+  $("medida").value = r?.anchoMP ? r.anchoMP + " cm" : "";
+  $("cliente").textContent = r?.cliente || "";
+  if (!$("op").value.trim()) { box.className = "aviso"; box.textContent = "Escribe el número de la OP. El producto, el cliente y la medida se completan solos al enviar."; return null; }
+  if (!r) { box.className = "aviso"; box.textContent = "El producto, el código y el cliente se completan solos desde el sistema al enviar."; return null; }
+  const anulada = /ANUL/.test(r.estado);
+  box.className = "aviso " + (anulada ? "bad" : "ok");
+  box.innerHTML = anulada ? `<b>La OP ${r.op} está ANULADA.</b> Confirma el número con tu líder.` : `OP ${r.op} · código ${r.cod || "sin código"}${r.mp ? " · " + r.mp : ""}${r.medida ? " · etiqueta " + r.medida : ""}`;
+  return r;
+}
+
+// ---------- cálculo ----------
+function minutos(ini, fin) {
+  if (!ini || !fin) return 0;
+  const [a, b] = ini.split(":").map(Number), [c, d] = fin.split(":").map(Number);
+  let m = (c * 60 + d) - (a * 60 + b);
+  if (m < 0) m += 1440; // turno de noche que pasa la medianoche
+  return m;
+}
+function leer() {
+  const [jornada, turno] = $("turno").value.split("|");
+  const r = {
+    fecha: $("fecha").value, jornada, turno, maquina: $("maquina").value,
+    operador: $("operador").value, op: $("op").value.trim(), velocidad: num($("velocidad").value),
+    medida: $("medida").value.trim(), setupIni: $("setupIni").value, setupFin: $("setupFin").value,
+    horaIni: $("horaIni").value, horaFin: $("horaFin").value,
+    tiempos: TIEMPOS.map((_, i) => i < TIEMPOS_HOJA ? num($("t" + i).value) : 0),
+    scrapM: SCRAP.map((_, i) => num($("sm" + i).value)),
+    madres: [], hijos: [], cajas: num($("cajas").value), sobrante: num($("sobrante").value),
+    // Balance: lo escribe el operador (no se calcula solo).
+    bal: { rec: num($("balRec").value), prod: num($("balProd").value), desp: num($("balDesp").value), tot: num($("balTot").value) }, devolucion: $("devolucion").value.trim(),
+    monitoreo: [], obs: $("obs").value.trim()
+  };
+  for (let i = 0; i < FILAS_PROD; i++) { const cod = $("bc" + i).value.trim(), m = num($("bm" + i).value); if (cod || m) r.madres.push({ cod, m }); }
+  for (let i = 0; i < 16; i++) r.hijos.push({ m: num($("hm" + i).value) });
+  for (let i = 0; i < nMon; i++) { const v = {}; let any = false; MON_CAMPOS.forEach(c => { v[c] = $(`m${i}_${c}`).value; if (v[c] && c !== "operador") any = true; }); if (any) r.monitoreo.push(v); }
+  const prod = buscarOP(r.op);
+  r.cod = prod?.cod || ""; r.des = prod?.des || ""; r.cliente = prod?.cliente || "";
+  r.min = minutos(r.horaIni, r.horaFin);
+  r.minSetup = minutos(r.setupIni, r.setupFin);
+  r.paro = r.tiempos.reduce((a, b) => a + b, 0);
+  // Totales de rollos hijo y metros: los escribe el operador (no se suman solos).
+  r.rollos = num($("totRollos").value);
+  r.metros = num($("totMetros").value);
+  r.recibido = r.madres.reduce((a, b) => a + b.m, 0);
+  r.scrap = r.scrapM.reduce((a, b) => a + b, 0);
+  r.estandar = r.min * r.velocidad;
+  return r;
+}
+
+function revisar(r) {
+  const c = [];
+  const falta = [["fecha", "la fecha"], ["maquina", "la máquina"], ["operador", "el operador"], ["op", "la OP"], ["horaIni", "la hora de inicio"], ["horaFin", "la hora de fin"]].filter(([k]) => !r[k]).map(([, t]) => t);
+  if (falta.length) c.push(["bad", "Falta " + falta.join(", ") + "."]);
+  const prod = buscarOP(r.op);
+  if (prod && /ANUL/.test(prod.estado)) c.push(["bad", `La OP ${r.op} está anulada.`]);
+  const negativos = [r.velocidad, r.cajas, r.sobrante, r.bal.rec, r.bal.prod, r.bal.desp, r.bal.tot, ...r.tiempos, ...r.scrapM, ...r.hijos.map(h => h.m), ...r.madres.map(b => b.m)].some(v => v < 0);
+  if (negativos) c.push(["bad", "Hay números negativos. Revisa las casillas."]);
+  // Horas y balance: avisan en rojo pero dejan enviar; el Excel y el PDF los marcan en rojo.
+  if (r.horaIni && r.horaFin && !r.min) c.push(["bad", "La hora de fin es igual a la hora de inicio.", "horas"]);
+  if (r.min && r.paro > r.min) c.push(["bad", `Los tiempos improductivos (${fmt(r.paro)} min) superan el tiempo trabajado (${fmt(r.min)} min).`, "horas"]);
+  if (r.min > num(r.turno) * 60) c.push(["warn", `El tiempo trabajado (${fmt(r.min)} min) es mayor que un turno de ${r.turno} h.`]);
+  if (!r.velocidad) c.push(["warn", "Falta la velocidad real."]);
+  if (!r.metros) c.push(["warn", "Escribe el total de metros en TOTALES."]);
+  // Tiempos improductivos: solo minutos enteros (ej. 30, no 0,5 ni 1:30) y ninguno mayor que el tiempo trabajado.
+  const tiemposRaros = [...document.querySelectorAll("#causasTiempo input")].filter(i => i.value.trim() !== "" && !/^\d+$/.test(i.value.trim()));
+  if (tiemposRaros.length) c.push(["bad", "Escribe los tiempos improductivos en minutos enteros (ej. 30), sin decimales ni horas."]);
+  const largo = r.tiempos.find(t => r.min && t > r.min);
+  if (largo) c.push(["bad", `Un tiempo improductivo (${fmt(largo)} min) es mayor que todo el tiempo trabajado (${fmt(r.min)} min). Revisa que esté en minutos.`]);
+  // Se compara lo que escribió el operador: Recibido contra Total.
+  if (r.bal.rec && r.bal.tot) {
+    const dif = r.bal.rec - r.bal.tot, pct = Math.abs(dif) / r.bal.rec;
+    if (pct > 0.05) c.push(["bad", `El balance no cuadra: recibido ${fmt(r.bal.rec)} m y total ${fmt(r.bal.tot)} m (${(pct * 100).toFixed(1)} % de diferencia).`, "balance"]);
+    else if (pct > 0.02) c.push(["warn", `El balance tiene una diferencia de ${fmt(dif)} m (${(pct * 100).toFixed(1)} %).`]);
+  } else c.push(["warn", "Escribe Recibido y Total en el balance."]);
+  if (!c.length) c.push(["ok", "Todo listo para guardar."]);
+  return c;
+}
+
+function recalc() {
+  const r = leer();
+  $("totParo").textContent = fmt(r.paro);
+  $("totScrap").textContent = fmt(r.scrap);
+  document.querySelectorAll("#causasTiempo input, #causasScrap input").forEach(i => i.classList.toggle("has", num(i.value) > 0));
+  const pct = r.bal.rec ? Math.abs(r.bal.rec - r.bal.tot) / r.bal.rec : 1;
+  const p = $("balPill");
+  if (!r.bal.rec || !r.bal.tot) { p.className = "pill warn"; p.textContent = "Falta llenar"; }
+  else if (pct <= 0.02) { p.className = "pill ok"; p.textContent = "Cuadra"; }
+  else if (pct <= 0.05) { p.className = "pill warn"; p.textContent = "Revisar"; }
+  else { p.className = "pill bad"; p.textContent = "No cuadra"; }
+  $("checks").innerHTML = revisar(r).map(([k, t, area]) => `<li class="${k}">${t}${area ? " <small>Se puede enviar igual; quedará marcado en rojo en el Excel.</small>" : ""}</li>`).join("");
+  store.set("etimet.troq.borrador", r);
+}
+
+// ---------- fila para BASE INDICADOR TROQ REB (A..BO) ----------
+// F y G (líder de grupo) no están en la hoja: quedan vacías para que las complete el asistente.
+function filaExcel(r) {
+  const [y, m, d] = (r.fecha || "").split("-");
+  const P = r.min;
+  const setup = r.setupIni && r.setupFin ? `Set up ${r.setupIni}-${r.setupFin} (${r.minSetup} min). ` : "";
+  const obs = (setup + r.obs).trim();
+  return [
+    r.maquina, r.jornada, d ? `${d}/${m}/${y}` : "", inicialOper(r.operador), nombreOper.get(r.operador) || "",
+    "", "", r.op, r.cod, r.des, r.velocidad || "",
+    Math.floor(P / 60), P % 60, r.min, +(P / 60).toFixed(4), P, num(r.turno), // L hora, M minuto
+    "", r.metros, r.cajas, 0, 0, r.estandar,
+    ...r.tiempos, // X..AQ
+    ...r.scrapM, // AR..BG
+    // BJ tiempo perdido = tiempos improductivos; BK tiempo real ocupado = BI - BJ (la fórmula de BASE).
+    r.scrap, P, r.paro, P - r.paro, "", "", "", obs // BH..BO
+  ];
+}
+const COLS = 67; // A..BO
+
+// ---------- guardar ----------
+function guardados() { return store.get("etimet.troq.reportes", []); }
+function pintarGuardados() {
+  const g = guardados();
+  $("nGuardados").textContent = g.length ? `${g.length} reporte${g.length > 1 ? "s" : ""}` : "";
+  $("tblGuardados").innerHTML = g.length ? g.map((r, i) => `<tr><td>${r.fecha}</td><td>${r.jornada}</td><td>${r.maquina}</td><td>${r.op}</td><td>${r.operador}</td><td>${fmt(r.metros)}</td><td>${fmt(r.scrap)}</td><td><button type="button" class="small" data-del="${i}">Quitar</button></td></tr>`).join("")
+    : `<tr><td colspan="8" class="muted">Todavía no hay reportes guardados en esta PC.</td></tr>`;
+}
+$("tblGuardados").addEventListener("click", e => {
+  const b = e.target.closest("[data-del]"); if (!b) return;
+  if (b.dataset.confirm !== "1") { b.dataset.confirm = "1"; b.textContent = "¿Seguro?"; return; }
+  const g = guardados(); g.splice(+b.dataset.del, 1); store.set("etimet.troq.reportes", g); pintarGuardados(); toast("Reporte quitado.");
+});
+
+$("frm").addEventListener("submit", e => {
+  e.preventDefault();
+  const r = leer();
+  const malos = revisar(r).filter(([k, , area]) => k === "bad" && !area);
+  if (malos.length) { toast("Corrige los puntos en rojo antes de guardar."); $("checks").scrollIntoView({ block: "center" }); return; }
+  r.guardado = new Date().toISOString();
+  const g = guardados(); g.push(r);
+  if (!store.set("etimet.troq.reportes", g)) { toast("No se pudo guardar en esta PC."); return; }
+  pintarGuardados();
+  enviarReporte(r);
+  limpiar();
+  $("listoTxt").textContent = `La OP ${r.op} (${r.des || "sin descripción"}) quedó guardada a las ${new Date().toTimeString().slice(0, 5)}.`;
+  $("listo").hidden = false; $("frm").hidden = true; scrollTo(0, 0);
+});
+$("btnOtro").onclick = () => { $("listo").hidden = true; $("frm").hidden = false; };
+
+// Envío: el reporte va dentro de un Microsoft Forms prellenado; el operador solo pulsa Enviar.
+// Power Automate recibe la respuesta y el script agrega la fila al Excel.
+// Sin enlace de Forms en config.js, se descarga el archivo .json como antes.
+const LETRAS = Array.from({ length: COLS }, (_, i) => (i >= 26 ? String.fromCharCode(64 + Math.floor(i / 26)) : "") + String.fromCharCode(65 + i % 26));
+const MARCA_FORMS = "REPORTE";
+let ultimoEnlace = "";
+function nombreReporte(r) {
+  const limpio = t => String(t).replace(/[^\w-]+/g, "");
+  // Hora local de guardado (HHMMSS): el PDF la usa para no repetir nombres.
+  const g = new Date(r.guardado), p2 = n => String(n).padStart(2, "0");
+  return `TROQ_${r.fecha}_OP${limpio(r.op)}_${limpio(r.maquina)}_${r.jornada}_${p2(g.getHours())}${p2(g.getMinutes())}${p2(g.getSeconds())}.json`;
+}
+function enlaceForms(r) {
+  const base = (window.CONFIG && window.CONFIG.formsLink) || "";
+  if (!base.includes("=" + MARCA_FORMS)) return "";
+  const fila = filaExcel(r), datos = { archivo: nombreReporte(r), fila: {} };
+  LETRAS.forEach((l, i) => { const v = fila[i]; if (v !== "" && v != null) datos.fila[l] = v; });
+  // Detalle compacto para el PDF del reporte (lo arma el script del Excel).
+  const hijos = r.hijos.map(h => h.m); while (hijos.length && !hijos[hijos.length - 1]) hijos.pop();
+  datos.d = { med: r.medida, cli: r.cliente, su: [r.setupIni, r.setupFin], h: [r.horaIni, r.horaFin],
+    bm: r.madres.map(b => [b.cod, b.m]), rh: hijos, sob: r.sobrante, dev: r.devolucion,
+    bal: [r.bal.rec, r.bal.prod, r.bal.desp, r.bal.tot], tr: r.rollos,
+    mon: r.monitoreo.map(m => MON_CAMPOS.map(c => m[c] || "")) };
+  // Avisos en rojo que no bloquearon el envío: [área, texto].
+  const al = revisar(r).filter(([k, , area]) => k === "bad" && area).map(([, t, area]) => [area, t]);
+  if (al.length) datos.al = al;
+  // Con texto delante, Forms no interpreta el JSON (si empieza con "{" muestra "[object Object]").
+  return base.replace("=" + MARCA_FORMS, "=" + encodeURIComponent("Reporte troquelado " + JSON.stringify(datos)));
+}
+function enviarReporte(r) {
+  ultimoEnlace = enlaceForms(r);
+  $("listoForms").hidden = $("btnForms").hidden = !ultimoEnlace;
+  if (ultimoEnlace) window.open(ultimoEnlace, "_blank");
+  else descargarReporte(r);
+}
+$("btnForms").onclick = () => { if (ultimoEnlace) window.open(ultimoEnlace, "_blank"); };
+function descargarReporte(r) {
+  const fila = filaExcel(r), datos = { formato: "PR/01-9", hoja: "BASE INDICADOR TROQ  REB", guardado: r.guardado, fila: {} };
+  LETRAS.forEach((l, i) => datos.fila[l] = fila[i] ?? "");
+  datos.detalle = { cliente: r.cliente, medida: r.medida, setup: [r.setupIni, r.setupFin], bobinasMadre: r.madres, rollosHijos: r.hijos.filter(h => h.m), sobrante: r.sobrante, devolucion: r.devolucion, monitoreo: r.monitoreo };
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 1)], { type: "application/json" }));
+  a.download = nombreReporte(r);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function tsv() { return guardados().map(r => filaExcel(r).map(v => String(v ?? "").replace(/[\t\n]/g, " ")).join("\t")).join("\n"); }
+$("btnCopiar").onclick = () => {
+  const g = guardados(); if (!g.length) { toast("No hay reportes guardados para copiar."); return; }
+  const text = tsv();
+  const fb = () => { const t = $("copyFallback"); t.value = text; t.hidden = false; t.focus(); t.select(); toast("Selecciona y copia el texto de abajo (Ctrl+C)."); };
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(() => toast(`${g.length} fila${g.length > 1 ? "s" : ""} copiada${g.length > 1 ? "s" : ""}.`), fb);
+  else fb();
+};
+$("btnDescargar").onclick = () => {
+  const g = guardados(); if (!g.length) { toast("No hay reportes guardados."); return; }
+  if (!window.XLSX) { toast("No se cargó la librería de Excel."); return; }
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(g.map(filaExcel)), "TROQ REB");
+  const det = g.map(r => ({ fecha: r.fecha, op: r.op, maquina: r.maquina, operador: r.operador, cliente: r.cliente, medida: r.medida, setup: `${r.setupIni}-${r.setupFin}`, bobinas_madre: r.madres.map(b => `${b.cod}: ${b.m} m`).join("; "), rollos_hijos: r.hijos.filter(h => h.m).map(h => `${h.m} m`).join("; "), sobrante: r.sobrante, devolucion: r.devolucion, monitoreo: JSON.stringify(r.monitoreo) }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(det), "DETALLE");
+  XLSX.writeFile(wb, `troquelado_${hoy()}.xlsx`);
+  toast("Excel generado.");
+};
+
+// ---------- estado inicial ----------
+function setVals(v) {
+  const turno = v.jornada && v.turno ? `${v.jornada}|${v.turno}` : (v.turnoSel || "");
+  ["fecha","maquina","operador","op","des","velocidad","medida","setupIni","setupFin","horaIni","horaFin","cajas","sobrante","devolucion","obs"].forEach(k => { $(k).value = v[k] ?? ""; if ($(k).tagName === "SELECT" && $(k).selectedIndex < 0) $(k).selectedIndex = 0; });
+  $("turno").value = turno; if ($("turno").selectedIndex < 0) $("turno").selectedIndex = 0;
+  [["balRec", "rec"], ["balProd", "prod"], ["balDesp", "desp"], ["balTot", "tot"]].forEach(([id, k]) => { $(id).value = v.bal?.[k] || ""; });
+  TIEMPOS.forEach((_, i) => { if (i < TIEMPOS_HOJA) $("t" + i).value = v.tiempos?.[i] || ""; });
+  $("totRollos").value = v.rollos || ""; $("totMetros").value = v.metros || "";
+  SCRAP.forEach((_, i) => { $("sm" + i).value = v.scrapM?.[i] || ""; });
+  for (let i = 0; i < 16; i++) $("hm" + i).value = v.hijos?.[i]?.m || "";
+  for (let i = 0; i < FILAS_PROD; i++) { $("bc" + i).value = v.madres?.[i]?.cod || ""; $("bm" + i).value = v.madres?.[i]?.m || ""; }
+  $("monitoreo").innerHTML = ""; nMon = 0;
+  const mon = v.monitoreo || [];
+  for (let i = 0; i < Math.max(FILAS_MON, mon.length); i++) addMon(mon[i] || {});
+  pintarProducto(); recalc();
+}
+function limpiar() {
+  const keep = { fecha: hoy(), turnoSel: $("turno").value, maquina: $("maquina").value, operador: $("operador").value };
+  if ($("op").value === EJEMPLO.op && $("obs").value === EJEMPLO.obs) { keep.maquina = ""; keep.operador = ""; keep.turnoSel = ""; }
+  setVals(keep);
+}
+$("btnNuevo").onclick = () => {
+  const b = $("btnNuevo");
+  if (!b.classList.contains("confirmar")) {
+    b.classList.add("confirmar"); b.textContent = "¿Seguro? Pulsa otra vez para borrar";
+    setTimeout(() => { b.classList.remove("confirmar"); b.textContent = "Borrar todo y empezar en blanco"; }, 4000);
+    return;
+  }
+  b.classList.remove("confirmar"); b.textContent = "Borrar todo y empezar en blanco";
+  setVals({ fecha: hoy() });
+  $("listo").hidden = true; $("frm").hidden = false; scrollTo(0, 0); toast("Hoja en blanco.");
+};
+if ($("btnEjemplo")) $("btnEjemplo").onclick = () => { setVals(EJEMPLO); $("listo").hidden = true; $("frm").hidden = false; scrollTo(0, 0); };
+
+const EJEMPLO = {
+  fecha: "2026-05-29", jornada: "DIA", turno: "12", maquina: "TR PLANA 1", operador: "SM", op: "7239", velocidad: 160,
+  medida: "", setupIni: "07:00", setupFin: "07:25", horaIni: "07:25", horaFin: "10:25",
+  tiempos: [0, 15, 10, 0, 0, 0, 15, 0, 0, 0, 0, 0, 15], scrapM: [0, 0, 0, 0, 80, 0, 0, 20],
+  madres: [{ cod: "BM-0529-01", m: 1360 }], hijos: [{ m: 620 }, { m: 620 }], cajas: 2, sobrante: 0,
+  bal: { rec: 1360, prod: 1240, desp: 100, tot: 1340 }, rollos: 2, metros: 1240,
+  obs: "Ejemplo basado en la OP 7239 del 29-may.",
+  monitoreo: [{ hora: "08:00", operador: "SM", avance: "75", ancho: "75", gapAv: "3", gapAn: "3", corteMarca: "OK", laminado: "SI", barniz: "SI", acabados: "SI", registro: "SI", impresion: "SI", troquelado: "SI", sentido: "4", corteRecto: "SI", defectos: "NO", obs: "" }]
+};
+
+function vista() {
+  const asis = location.hash === "#asistente";
+  $("vistaAsistente").hidden = !asis;
+  if ($("lnkAsistente")) $("lnkAsistente").textContent = asis ? "Volver a la vista del operador" : "Vista del asistente";
+  if ($("lnkAsistente")) $("lnkAsistente").href = asis ? "#operador" : "#asistente";
+  if (asis) { pintarGuardados(); $("vistaAsistente").scrollIntoView(); }
+}
+addEventListener("hashchange", vista);
+
+unidades();
+fillDatalist();
+$("frm").addEventListener("input", e => {
+  if (e.target.id === "op") pintarProducto();
+  recalc();
+});
+$("frm").addEventListener("change", recalc);
+// Enter pasa a la siguiente casilla; solo el botón Guardar guarda el reporte.
+$("frm").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || e.target.tagName === "TEXTAREA" || e.target.tagName === "BUTTON") return;
+  e.preventDefault();
+  const campos = [...$("frm").querySelectorAll("input, select, textarea")].filter(c => !c.disabled && c.offsetParent);
+  campos[campos.indexOf(e.target) + 1]?.focus();
+});
+// El borrador guardado se recupera, pero la fecha siempre arranca en la de hoy (se puede cambiar a mano).
+setVals({ ...(store.get("etimet.troq.borrador", null) || {}), fecha: hoy() });
+pintarGuardados();
+vista();
+})();
+</script>
+</body>
+</html>

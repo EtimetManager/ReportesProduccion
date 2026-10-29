@@ -1,0 +1,20 @@
+REPORTES DE PRODUCCIÓN ETIMET - INSTALACIÓN EN UNA PC DE PLANTA
+
+La PC no necesita usuario de Windows ni cuenta de ETIMET/OneDrive. Solo internet.
+
+1. Copia la carpeta "Reportes ETIMET" completa a la PC (por ejemplo en C:\Reportes ETIMET).
+   Deben ir juntos: inicio.html, impresion.html, troquelado.html, corte.html y config.js.
+2. Crea un acceso directo de inicio.html en el escritorio y ponle de nombre "Reportes de producción".
+3. Haz doble clic: se abre en Chrome o Edge con 3 botones (Impresión, Troquelado y Bobinado, Corte y Refilado).
+4. Prueba: abre el proceso de esa máquina, llena máquina, OP, operador y horas de inicio y fin, pulsa "Guardar reporte" y comprueba que se abre el formulario
+   "Reporte Troquelado" de Microsoft Forms con el reporte. NO lo envíes (sería una fila de prueba).
+   Luego pulsa "Borrar todo" (doble clic).
+
+Qué hace el operador cada turno:
+- Abre "Reportes de producción", elige su proceso, llena la hoja igual que la de papel y pulsa Guardar.
+- Se abre el formulario con el reporte ya escrito: pulsa Enviar.
+- El reporte llega solo al Excel y se guarda su PDF. No hace falta nada más.
+
+Datos de la OP:
+- El operador solo escribe el número de la OP. El código, producto, cliente y medida se completan
+  solos desde el sistema cuando llega el reporte (no hace falta actualizar nada en las PCs).
