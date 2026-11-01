@@ -157,12 +157,13 @@ input[readonly] { background: var(--head); color: var(--ink); cursor: default; }
           <th>Cliente</th><td><div class="autotxt" id="cliente"></div></td>
         </tr>
       </table>
-      <table class="t" style="width:72%">
+      <table class="t" style="width:90%">
         <tr>
           <th>Inicio Set Up</th><td><input id="setupIni" type="time"></td>
           <th>Fin Set Up</th><td><input id="setupFin" type="time"></td>
           <th>Hora Inicio</th><td><input id="horaIni" type="time" required></td>
           <th>Hora Fin</th><td><input id="horaFin" type="time" required></td>
+          <th>Tiempo total</th><td class="calc" id="tiempoTotal" title="Desde Inicio Set Up (o Hora Inicio si no hubo set up) hasta Hora Fin">0 min</td>
         </tr>
       </table>
       <div class="aviso" id="producto">Escribe el número de la OP. El producto, el cliente y la medida se completan solos al enviar.</div>
@@ -184,6 +185,7 @@ input[readonly] { background: var(--head); color: var(--ink); cursor: default; }
           <tr><th colspan="2">BOBINAS MADRE</th><th colspan="2">Rollos Hijos</th><th colspan="2">Rollos Hijos</th></tr>
           <tr><th>Código ID</th><th>Metros</th><th>Cant. Rll</th><th>Metros</th><th>Cant. Rll</th><th>Metros</th></tr>
           <tbody id="produccion"></tbody>
+          <tr><td colspan="6" style="height:auto; text-align:left"><button type="button" class="small" id="btnFilaProd">Agregar fila de rollos</button> <small class="muted" id="infoFilasProd"></small></td></tr>
         </table>
         <div style="display:grid; gap:12px">
           <table class="t">
@@ -274,12 +276,18 @@ input[readonly] { background: var(--head); color: var(--ink); cursor: default; }
 const $ = id => document.getElementById(id);
 const CAT = window.CATALOGOS || { ops: {}, operadores: [] };
 
-// Columnas X..AP de BASE INDICADOR SLITER, en el orden del Excel. Las 16 primeras están en la hoja (en otro orden,
-// ver REJILLA). Las 3 últimas (Embalaje, Espacio para materia prima, Parada no programada) no están en la hoja: quedan en 0.
+// Columnas X..AP de BASE INDICADOR SLITER, en el orden del Excel. En pantalla van las 16 de la hoja más Embalaje y
+// Parada no programada (ver REJILLA); Espacio para materia prima no se muestra y queda en 0.
+// "Llenado de datos" no tiene columna en BASE: va aparte (columna BR del Excel general, antes de ARCHIVO) y suma al total.
 const TIEMPOS = ["Cambio de trabajo","Empates","Fallas y cambios de Cuchillas","Falta de material","Capacitaciones","Cambio rollos madre","Falla de materia Prima","Corte de Kores","Variación de media","Falla de tensiones","Cambio rollos hijos","Limpieza de máquina","Mantenimiento","Aprob. Calidad","Cambio de turno","Alimentación","Embalaje","Espacio para materia prima","Parada no programada"];
-const TIEMPOS_HOJA = 16;
+const LLENADO = TIEMPOS.length; // índice de "Llenado de datos" (casilla t19), fuera de X..AP
+// Nombre que ve el operador cuando es distinto del de BASE.
+const ETIQUETA = { 18: "Paradas no programadas", [LLENADO]: "Llenado de datos" };
+const nombreTiempo = i => ETIQUETA[i] || TIEMPOS[i];
 // Posición de cada causa en la hoja (fila por fila, 6 por fila); -1 = casilla vacía.
-const REJILLA = [[0, 1, 2, 3, 4, 15], [5, 6, 7, 8, 9, -1], [10, 11, 12, 13, 14, -1]];
+// Última columna: Alimentación, Embalaje, Paradas no programadas y Llenado de datos (fila nueva).
+const REJILLA = [[0, 1, 2, 3, 4, 15], [5, 6, 7, 8, 9, 16], [10, 11, 12, 13, 14, 18], [-1, -1, -1, -1, -1, LLENADO]];
+const EN_HOJA = new Set(REJILLA.flat().filter(i => i >= 0 && i < TIEMPOS.length));
 // Columnas AR..BG, mismo orden de lectura que la hoja.
 const SCRAP = ["Cambio trabajo","Aprobaciones Calidad","Falla materia prima","Mal Bobinado","Arrugas","Mala Apariencia","Refile","Mal Refilado","Cambio rollos","Empates","Calibraciones de Máquina","Variación de Medida","Contaminación","Mantenimiento","Falla Bobinado","Corte de Energía"];
 // Valor = nombre que usa BASE INDICADORES; texto = nombre completo que ve el operador.
@@ -287,6 +295,9 @@ const MAQUINAS = [["CORTADORA 1","Cortadora de materia prima 1 (CORTADORA 1)"],[
 // Lista de personal que entregó May (13-oct-2026): [nombre como está en BASE OPERADOR, máquina o área, iniciales].
 const PERSONAL = [["MORETA NAVARRETE ALEX XAVIER", "Asis. Prod.", "MA"], ["ALCIVAR BRAVO CARLOS ALFREDO", "Alistamiento", "AC"], ["GUERRERO BARCIA LUIS FERNANDO", "Alistamiento", "GL"], ["GUAITA GUANOLUISA DARIO JAVIER", "Prensa Digital", "DG"], ["TITUAÑA SANCHEZ JUAN FRANCISCO", "Weigang", "TJ"], ["VALDOSPINO MORA JOFFRE ARIEL", "Weigang", "VA"], ["LOPEZ IMBACUAN MILTON ERNESTO", "Depai 450", "LM"], ["PRADO AVILA HAMILTON BENIGNO", "Depai 450", "PH"], ["MOROCHO CANTUÑA JOSE ANDRES", "Mark Andy 2101", "MJO"], ["COLLAGUAZO QUILUMBA FREDDY FERNANDO", "Mark Andy 2101", "FC"], ["CEDEÑO RODRIGUEZ ELIAS MANUEL", "Sprint 450 8C", "CE"], ["DELGADO CALDERON WALTER ARTURO", "Sprint 450 8C", "DW"], ["CONFORME DE LA CRUZ ALBERTO PASCUAL", "Imp. Rollos Térmicos", "CA"], ["ANGULO BENAVIDES KEVIN GABRIEL", "Imp. Rollos Térmicos", "AK"], ["CACHIPUENDO AMANTA CRISTOPHER XAVIER", "Troq. Plana 1", "CC"], ["SIMBAÑA VEGA WILMER MIGUEL", "Troq. Plana 1", "SM"], ["JIMA MORQUEACHO JONATHAN FABRICIO", "Troq. Plana 1", "JJ"], ["VILLALOBOS GONZALEZ MILTON WLADIMIR", "Troq. Plana 2", "MV"], ["PINTO CALDERON BRYAN STEVEN", "Troq. Rotativa 1", "PB"], ["LOPEZ GUALLO DIEGO GEOVANNY", "Troq. Rotativa 1", "GG"], ["VALAREZO CANDO MARCOS ELIAS", "Troq. Rotativa 2", "VM"], ["ORTIZ LARA JUAN CARLOS", "Troq. Rotativa 2", "OJC"], ["SEMANATE LASLUISA MILTON RAUL", "Troq. Rotativa 3", "SP"], ["JARA CENTENO DIEGO ALEXANDER", "Troq. Rotativa 3", "JD"], ["DUEÑAS HERRERA STALIN JONATHA", "Troq. Rotativa 4", "DS"], ["CRUZ CHISAGUANO EDWIN STEVEN", "Troq. Rotativa 4", "EC"], ["TRONCOSO RODRIGUEZ EDISON ROBERTO", "Troq. Láser", "TE"], ["PILCO TITUAÑA JIMMY CHAYAN", "Rebobinadora 2", "PJ"], ["YANEZ ESPAÑA CARLOS WILFRIDO", "Rebobinadora 1", "YC"], ["MUGMAL MUGMAL KEVIN ROBERTO", "Rebobinadora 1", "MK"], ["SIMBAÑA VEGA WILLIAM ROLANDO", "Reb. R. Térmicos 1", "SW"], ["ALVARADO CERDA NESTOR WILBER", "Reb. R. Térmicos 1", "AN"], ["HERRERA CASTILLO JOSE FERNANDO", "Reb. R. Térmicos 2", "HJ"], ["ROCHA DELGADO RICARDO RAMIRO", "Reb. R. Térmicos 2", "RR"], ["CISNEROS FIGUEROA MANUEL FELIPE", "Cortadora M.P. 1", "CM"], ["BATTA PINTO KEYSMER JOSE", "Cortadora M.P. 2", "BK"], ["SIMBAÑA VEGA JAIME ULISES", "(no figura en Personal de Calidad)", "SJ"]];
 const FILAS_PROD = 8; // 8 bobinas madre y 16 rollos hijos, como en la hoja
+const MAX_ROLLOS = 100; // con "Agregar fila de rollos" se llega hasta 100 rollos hijos (50 filas)
+const MAX_FILAS_PROD = MAX_ROLLOS / 2;
+let filasProd = FILAS_PROD;
 const MON_CAMPOS = ["hora","operador","ancho","varMedida","arrugas","kore","cuchillas","tension","sentido","apariencia","defectos","obs"];
 const SINO = new Set(["varMedida","arrugas","apariencia","defectos"]);
 const FILAS_MON = 6;
@@ -311,18 +322,42 @@ const opcionesOper = '<option value=""></option>' + [...PERSONAL].sort((a, b) =>
 $("maquina").innerHTML = '<option value="">Elegir…</option>' + MAQUINAS.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
 $("operador").innerHTML = opcionesOper.replace('<option value=""></option>', '<option value="">Elegir…</option>');
 
-$("causasTiempo").innerHTML = [0, 1, 2].map(f => "<tr>" +
-  [0, 1, 2, 3, 4, 5].map(c => { const i = REJILLA[f][c]; if (i < 0) return `<td class="lbl"></td><td></td>`; return `<td class="lbl">${TIEMPOS[i]}</td><td><input id="t${i}" data-u="min" type="number" min="0" step="1" inputmode="numeric" aria-label="${TIEMPOS[i]} (min)"></td>`; }).join("") +
-  (f === 0 ? `<td class="calc big" rowspan="3" id="totParo">0</td>` : "") + "</tr>").join("");
+$("causasTiempo").innerHTML = REJILLA.map((fila, f) => "<tr>" +
+  fila.map(i => { if (i < 0) return `<td class="lbl"></td><td></td>`; return `<td class="lbl">${nombreTiempo(i)}</td><td><input id="t${i}" data-u="min" type="number" min="0" step="1" inputmode="numeric" aria-label="${nombreTiempo(i)} (min)"></td>`; }).join("") +
+  (f === 0 ? `<td class="calc big" rowspan="${REJILLA.length}" id="totParo">0</td>` : "") + "</tr>").join("");
 
 $("causasScrap").innerHTML = [0, 1, 2, 3].map(f => "<tr>" +
   [0, 1, 2, 3].map(c => { const i = f * 4 + c; return `<td class="lbl">${SCRAP[i]}</td><td><input id="sm${i}" data-u="m" type="number" min="0" step="1" aria-label="${SCRAP[i]} (m)"></td>`; }).join("") +
   (f === 0 ? `<td class="calc big" rowspan="4" id="totScrap">0</td>` : "") + "</tr>").join("");
 
-$("produccion").innerHTML = Array.from({ length: FILAS_PROD }, (_, k) => `<tr>
+// Rollos hijos: filas 1-8 = rollos 1-8 y 9-16 (como en la hoja); filas extra = rollos 17-18, 19-20, ... hasta 100.
+function idxHijos(k) { return k < FILAS_PROD ? [k, k + FILAS_PROD] : [2 * k, 2 * k + 1]; }
+function filaProd(k) {
+  const [a, b] = idxHijos(k);
+  return `<tr>
   <td><input id="bc${k}" aria-label="Bobina madre ${k + 1} código ID"></td><td><input id="bm${k}" data-u="m" type="number" min="0" step="1" aria-label="Bobina madre ${k + 1} metros"></td>
-  <td class="n">${k + 1}</td><td><input id="hm${k}" data-u="m" type="number" min="0" step="1" aria-label="Rollo ${k + 1} metros"></td>
-  <td class="n">${k + 9}</td><td><input id="hm${k + 8}" data-u="m" type="number" min="0" step="1" aria-label="Rollo ${k + 9} metros"></td></tr>`).join("");
+  <td class="n">${a + 1}</td><td><input id="hm${a}" data-u="m" type="number" min="0" step="1" aria-label="Rollo ${a + 1} metros"></td>
+  <td class="n">${b + 1}</td><td><input id="hm${b}" data-u="m" type="number" min="0" step="1" aria-label="Rollo ${b + 1} metros"></td></tr>`;
+}
+function infoFilasProd() {
+  $("infoFilasProd").textContent = `${filasProd * 2} de ${MAX_ROLLOS} rollos`;
+  $("btnFilaProd").disabled = filasProd >= MAX_FILAS_PROD;
+}
+function ponerFilasProd(n) {
+  filasProd = Math.min(MAX_FILAS_PROD, Math.max(FILAS_PROD, n));
+  $("produccion").innerHTML = Array.from({ length: filasProd }, (_, k) => filaProd(k)).join("");
+  unidades($("produccion")); infoFilasProd();
+}
+function agregarFilaProd() {
+  if (filasProd >= MAX_FILAS_PROD) { toast(`Máximo ${MAX_ROLLOS} rollos.`); return; }
+  $("produccion").insertAdjacentHTML("beforeend", filaProd(filasProd));
+  filasProd++;
+  unidades($("produccion")); infoFilasProd();
+  $("hm" + idxHijos(filasProd - 1)[0]).focus();
+  recalc();
+}
+$("produccion").innerHTML = Array.from({ length: FILAS_PROD }, (_, k) => filaProd(k)).join("");
+$("btnFilaProd").onclick = agregarFilaProd;
 
 let nMon = 0;
 function addMon(v = {}) {
@@ -393,21 +428,23 @@ function leer() {
     operador: $("operador").value, op: $("op").value.trim(), velocidad: num($("velocidad").value),
     medida: $("medida").value.trim(), setupIni: $("setupIni").value, setupFin: $("setupFin").value,
     horaIni: $("horaIni").value, horaFin: $("horaFin").value,
-    tiempos: TIEMPOS.map((_, i) => i < TIEMPOS_HOJA ? num($("t" + i).value) : 0),
+    tiempos: TIEMPOS.map((_, i) => EN_HOJA.has(i) ? num($("t" + i).value) : 0), llenado: num($("t" + LLENADO).value),
     scrapM: SCRAP.map((_, i) => num($("sm" + i).value)),
     madres: [], hijos: [], cajas: num($("cajas").value), sobrante: num($("sobrante").value),
     // Balance: lo escribe el operador (no se calcula solo).
     bal: { rec: num($("balRec").value), prod: num($("balProd").value), desp: num($("balDesp").value), tot: num($("balTot").value) }, devolucion: $("devolucion").value.trim(),
     monitoreo: [], obs: $("obs").value.trim()
   };
-  for (let i = 0; i < FILAS_PROD; i++) { const cod = $("bc" + i).value.trim(), m = num($("bm" + i).value); if (cod || m) r.madres.push({ cod, m }); }
-  for (let i = 0; i < 16; i++) r.hijos.push({ m: num($("hm" + i).value) });
+  for (let i = 0; i < filasProd; i++) { const cod = $("bc" + i).value.trim(), m = num($("bm" + i).value); if (cod || m) r.madres.push({ cod, m }); }
+  for (let i = 0; i < filasProd * 2; i++) r.hijos.push({ m: num($("hm" + i).value) });
   for (let i = 0; i < nMon; i++) { const v = {}; let any = false; MON_CAMPOS.forEach(c => { v[c] = $(`m${i}_${c}`).value; if (v[c] && c !== "operador") any = true; }); if (any) r.monitoreo.push(v); }
   const prod = buscarOP(r.op);
   r.cod = prod?.cod || ""; r.des = prod?.des || ""; r.cliente = prod?.cliente || "";
-  r.min = minutos(r.horaIni, r.horaFin);
+  // Tiempo total del reporte: desde Inicio Set Up hasta Hora Fin (si no hubo set up, desde Hora Inicio).
+  r.ini = r.setupIni || r.horaIni;
+  r.min = minutos(r.ini, r.horaFin);
   r.minSetup = minutos(r.setupIni, r.setupFin);
-  r.paro = r.tiempos.reduce((a, b) => a + b, 0);
+  r.paro = r.tiempos.reduce((a, b) => a + b, 0) + r.llenado;
   // Totales de rollos hijo y metros: los escribe el operador (no se suman solos).
   r.rollos = num($("totRollos").value);
   r.metros = num($("totMetros").value);
@@ -423,10 +460,11 @@ function revisar(r) {
   if (falta.length) c.push(["bad", "Falta " + falta.join(", ") + "."]);
   const prod = buscarOP(r.op);
   if (prod && /ANUL/.test(prod.estado)) c.push(["bad", `La OP ${r.op} está anulada.`]);
-  const negativos = [r.velocidad, r.cajas, r.sobrante, r.bal.rec, r.bal.prod, r.bal.desp, r.bal.tot, ...r.tiempos, ...r.scrapM, ...r.hijos.map(h => h.m), ...r.madres.map(b => b.m)].some(v => v < 0);
+  const negativos = [r.velocidad, r.cajas, r.sobrante, r.bal.rec, r.bal.prod, r.bal.desp, r.bal.tot, ...r.tiempos, r.llenado, ...r.scrapM, ...r.hijos.map(h => h.m), ...r.madres.map(b => b.m)].some(v => v < 0);
   if (negativos) c.push(["bad", "Hay números negativos. Revisa las casillas."]);
   // Horas y balance: avisan en rojo pero dejan enviar; el Excel y el PDF los marcan en rojo.
-  if (r.horaIni && r.horaFin && !r.min) c.push(["bad", "La hora de fin es igual a la hora de inicio.", "horas"]);
+  if (r.ini && r.horaFin && !r.min) c.push(["bad", r.setupIni ? "La hora de fin es igual al inicio del set up." : "La hora de fin es igual a la hora de inicio.", "horas"]);
+  if (r.setupIni && r.horaIni && minutos(r.setupIni, r.horaIni) > 720) c.push(["warn", "La hora de inicio es antes del inicio del set up. Revisa las horas."]);
   if (r.min && r.paro > r.min) c.push(["bad", `Los tiempos improductivos (${fmt(r.paro)} min) superan el tiempo trabajado (${fmt(r.min)} min).`, "horas"]);
   if (r.min > num(r.turno) * 60) c.push(["warn", `El tiempo trabajado (${fmt(r.min)} min) es mayor que un turno de ${r.turno} h.`]);
   if (!r.velocidad) c.push(["warn", "Falta la velocidad real."]);
@@ -434,7 +472,7 @@ function revisar(r) {
   // Tiempos improductivos: solo minutos enteros (ej. 30, no 0,5 ni 1:30) y ninguno mayor que el tiempo trabajado.
   const tiemposRaros = [...document.querySelectorAll("#causasTiempo input")].filter(i => i.value.trim() !== "" && !/^\d+$/.test(i.value.trim()));
   if (tiemposRaros.length) c.push(["bad", "Escribe los tiempos improductivos en minutos enteros (ej. 30), sin decimales ni horas."]);
-  const largo = r.tiempos.find(t => r.min && t > r.min);
+  const largo = [...r.tiempos, r.llenado].find(t => r.min && t > r.min);
   if (largo) c.push(["bad", `Un tiempo improductivo (${fmt(largo)} min) es mayor que todo el tiempo trabajado (${fmt(r.min)} min). Revisa que esté en minutos.`]);
   // Se compara lo que escribió el operador: Recibido contra Total.
   if (r.bal.rec && r.bal.tot) {
@@ -449,6 +487,7 @@ function revisar(r) {
 function recalc() {
   const r = leer();
   $("totParo").textContent = fmt(r.paro);
+  $("tiempoTotal").textContent = r.min ? `${Math.floor(r.min / 60)} h ${r.min % 60} min` : "0 min";
   $("totScrap").textContent = fmt(r.scrap);
   document.querySelectorAll("#causasTiempo input, #causasScrap input").forEach(i => i.classList.toggle("has", num(i.value) > 0));
   const pct = r.bal.rec ? Math.abs(r.bal.rec - r.bal.tot) / r.bal.rec : 1;
@@ -477,10 +516,11 @@ function filaExcel(r) {
     r.paro, // AQ total tiempos
     ...r.scrapM, // AR..BG
     // BJ tiempo perdido = tiempos improductivos; BK tiempo real ocupado = BI - BJ (la fórmula de BASE).
-    r.scrap, P, r.paro, P - r.paro, "", "", "", obs // BH..BO
+    r.scrap, P, r.paro, P - r.paro, "", "", "", obs, // BH..BO
+    "", "", r.llenado || "" // BP, BQ (rendimiento y OEE los calcula el script); BR llenado de datos (min)
   ];
 }
-const COLS = 67; // A..BO
+const COLS = 70; // A..BR
 
 // ---------- guardar ----------
 function guardados() { return store.get("etimet.corte.reportes", []); }
@@ -584,11 +624,15 @@ function setVals(v) {
   ["fecha","maquina","operador","op","des","velocidad","medida","setupIni","setupFin","horaIni","horaFin","cajas","sobrante","devolucion","obs"].forEach(k => { $(k).value = v[k] ?? ""; if ($(k).tagName === "SELECT" && $(k).selectedIndex < 0) $(k).selectedIndex = 0; });
   $("turno").value = turno; if ($("turno").selectedIndex < 0) $("turno").selectedIndex = 0;
   [["balRec", "rec"], ["balProd", "prod"], ["balDesp", "desp"], ["balTot", "tot"]].forEach(([id, k]) => { $(id).value = v.bal?.[k] || ""; });
-  TIEMPOS.forEach((_, i) => { if (i < TIEMPOS_HOJA) $("t" + i).value = v.tiempos?.[i] || ""; });
+  TIEMPOS.forEach((_, i) => { if (EN_HOJA.has(i)) $("t" + i).value = v.tiempos?.[i] || ""; });
+  $("t" + LLENADO).value = v.llenado || "";
   $("totRollos").value = v.rollos || ""; $("totMetros").value = v.metros || "";
   SCRAP.forEach((_, i) => { $("sm" + i).value = v.scrapM?.[i] || ""; });
-  for (let i = 0; i < 16; i++) $("hm" + i).value = v.hijos?.[i]?.m || "";
-  for (let i = 0; i < FILAS_PROD; i++) { $("bc" + i).value = v.madres?.[i]?.cod || ""; $("bm" + i).value = v.madres?.[i]?.m || ""; }
+  // Filas de producción: las 8 de la hoja más las que hagan falta para los rollos guardados (máx. 100).
+  const nh = (v.hijos || []).reduce((u, h, i) => h?.m ? i + 1 : u, 0);
+  ponerFilasProd(Math.max((v.madres || []).length, nh > 16 ? Math.ceil(nh / 2) : 0));
+  for (let i = 0; i < filasProd * 2; i++) $("hm" + i).value = v.hijos?.[i]?.m || "";
+  for (let i = 0; i < filasProd; i++) { $("bc" + i).value = v.madres?.[i]?.cod || ""; $("bm" + i).value = v.madres?.[i]?.m || ""; }
   $("monitoreo").innerHTML = ""; nMon = 0;
   const mon = v.monitoreo || [];
   for (let i = 0; i < Math.max(FILAS_MON, mon.length); i++) addMon(mon[i] || {});
