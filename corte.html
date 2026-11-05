@@ -280,13 +280,13 @@ const CAT = window.CATALOGOS || { ops: {}, operadores: [] };
 // Parada no programada (ver REJILLA); Espacio para materia prima no se muestra y queda en 0.
 // "Llenado de datos" no tiene columna en BASE: va aparte (columna BR del Excel general, antes de ARCHIVO) y suma al total.
 const TIEMPOS = ["Cambio de trabajo","Empates","Fallas y cambios de Cuchillas","Falta de material","Capacitaciones","Cambio rollos madre","Falla de materia Prima","Corte de Kores","Variación de media","Falla de tensiones","Cambio rollos hijos","Limpieza de máquina","Mantenimiento","Aprob. Calidad","Cambio de turno","Alimentación","Embalaje","Espacio para materia prima","Parada no programada"];
-const LLENADO = TIEMPOS.length; // índice de "Llenado de datos" (casilla t19), fuera de X..AP
+const EXTRA_T = ["Llenado de datos", "Cortes de luz"]; // fuera de X..AP: índices TIEMPOS.length + k (casillas t19, t20)
 // Nombre que ve el operador cuando es distinto del de BASE.
-const ETIQUETA = { 18: "Paradas no programadas", [LLENADO]: "Llenado de datos" };
-const nombreTiempo = i => ETIQUETA[i] || TIEMPOS[i];
+const ETIQUETA = { 18: "Paradas no programadas" };
+const nombreTiempo = i => ETIQUETA[i] || TIEMPOS[i] || EXTRA_T[i - TIEMPOS.length];
 // Posición de cada causa en la hoja (fila por fila, 6 por fila); -1 = casilla vacía.
 // Última columna: Alimentación, Embalaje, Paradas no programadas y Llenado de datos (fila nueva).
-const REJILLA = [[0, 1, 2, 3, 4, 15], [5, 6, 7, 8, 9, 16], [10, 11, 12, 13, 14, 18], [-1, -1, -1, -1, -1, LLENADO]];
+const REJILLA = [[0, 1, 2, 3, 4, 15], [5, 6, 7, 8, 9, 16], [10, 11, 12, 13, 14, 18], [20, -1, -1, -1, -1, 19]];
 const EN_HOJA = new Set(REJILLA.flat().filter(i => i >= 0 && i < TIEMPOS.length));
 // Columnas AR..BG, mismo orden de lectura que la hoja.
 const SCRAP = ["Cambio trabajo","Aprobaciones Calidad","Falla materia prima","Mal Bobinado","Arrugas","Mala Apariencia","Refile","Mal Refilado","Cambio rollos","Empates","Calibraciones de Máquina","Variación de Medida","Contaminación","Mantenimiento","Falla Bobinado","Corte de Energía"];
@@ -295,7 +295,7 @@ const SCRAP = ["Cambio trabajo","Aprobaciones Calidad","Falla materia prima","Ma
 // Valor = nombre que usa BASE INDICADORES; texto = nombre completo que ve el operador.
 const MAQUINAS_GRUPOS = [["Corte y Refilado", [["CORTADORA 1", "Cortadora de materia prima 1 (CORTADORA 1)"], ["CORTADORA 2", "Cortadora de materia prima 2 (CORTADORA 2)"]]], ["Impresión", [["WEIGANG", "Weigang (WEIGANG)"], ["SPRINT", "Sprint 450-8C (SPRINT)"], ["DEPAI", "Depai 450 (DEPAI)"], ["MARK ANDY", "Mark Andy 2101 (MARK ANDY)"], ["DIGITAL", "Prensa digital (DIGITAL)"], ["IMPRESORA ROLLOS TERMICOS", "Impresora cort. reb. rollos térmicos"]]], ["Troquelado y Bobinado", [["TR 1", "Troqueladora rotativa DK-320 - 1 (TR 1)"], ["TR 2", "Troqueladora rotativa DK-320 - 2 (TR 2)"], ["TR 3", "Troqueladora rotativa DK-320 - 3 (TR 3)"], ["TR 4", "Troqueladora rebobinadora Wurtemberg 450 - 4 (TR 4)"], ["TR PLANA 1", "Troqueladora plana Chanzen 320 - 1 (TR PLANA 1)"], ["TR PLANA 2", "Troqueladora plana MQ-320AI - 2 (TR PLANA 2)"], ["TR LASER", "Troqueladora Golden Laser (TR LASER)"], ["REBOBINADORA 1", "Rebobinadora DBFQ-330B - 1"], ["REBOBINADORA 2", "Rebobinadora DBFQ-330B - 2"], ["REBOBINADORA ROLLOS TERMICOS 1", "Cort. reb. de rollos térmicos - 1"], ["REBOBINADORA ROLLOS TERMICOS 2", "Cort. reb. de rollos térmicos - 2"], ["CORTADORA TERMOENCOGIBLE", "Cortadora de manga termoencogible"], ["FORMADORA TERMOENCOGIBLE", "Formadora de manga termoencogible"], ["EMPACADORA", "Empacadora"]]]];
 // Lista de personal que entregó May (13-oct-2026): [nombre como está en BASE OPERADOR, máquina o área, iniciales].
-const PERSONAL = [["ALCIVAR BRAVO CARLOS ALFREDO", "Alistamiento", "AC"], ["GUERRERO BARCIA LUIS FERNANDO", "Alistamiento", "GL"], ["GUAITA GUANOLUISA DARIO JAVIER", "Prensa Digital", "DG"], ["TITUAÑA SANCHEZ JUAN FRANCISCO", "Weigang", "TJ"], ["VALDOSPINO MORA JOFFRE ARIEL", "Weigang", "VA"], ["LOPEZ IMBACUAN MILTON ERNESTO", "Depai 450", "LM"], ["PRADO AVILA HAMILTON BENIGNO", "Depai 450", "PH"], ["MOROCHO CANTUÑA JOSE ANDRES", "Mark Andy 2101", "MJO"], ["COLLAGUAZO QUILUMBA FREDDY FERNANDO", "Mark Andy 2101", "FC"], ["CEDEÑO RODRIGUEZ ELIAS MANUEL", "Sprint 450 8C", "CE"], ["DELGADO CALDERON WALTER ARTURO", "Sprint 450 8C", "DW"], ["CONFORME DE LA CRUZ ALBERTO PASCUAL", "Imp. Rollos Térmicos", "CA"], ["ANGULO BENAVIDES KEVIN GABRIEL", "Imp. Rollos Térmicos", "AK"], ["CACHIPUENDO AMANTA CRISTOPHER XAVIER", "Troq. Plana 1", "CC"], ["SIMBAÑA VEGA WILMER MIGUEL", "Troq. Plana 1", "SM"], ["JIMA MORQUEACHO JONATHAN FABRICIO", "Troq. Plana 1", "JJ"], ["VILLALOBOS GONZALEZ MILTON WLADIMIR", "Troq. Plana 2", "MV"], ["PINTO CALDERON BRYAN STEVEN", "Troq. Rotativa 1", "PB"], ["LOPEZ GUALLO DIEGO GEOVANNY", "Troq. Rotativa 1", "GG"], ["VALAREZO CANDO MARCOS ELIAS", "Troq. Rotativa 2", "VM"], ["ORTIZ LARA JUAN CARLOS", "Troq. Rotativa 2", "OJC"], ["SEMANATE LASLUISA MILTON RAUL", "Troq. Rotativa 3", "SP"], ["JARA CENTENO DIEGO ALEXANDER", "Troq. Rotativa 3", "JD"], ["DUEÑAS HERRERA STALIN JONATHA", "Troq. Rotativa 4", "DS"], ["CRUZ CHISAGUANO EDWIN STEVEN", "Troq. Rotativa 4", "EC"], ["TRONCOSO RODRIGUEZ EDISON ROBERTO", "Troq. Láser", "TE"], ["PILCO TITUAÑA JIMMY CHAYAN", "Rebobinadora 2", "PJ"], ["YANEZ ESPAÑA CARLOS WILFRIDO", "Rebobinadora 1", "YC"], ["MUGMAL MUGMAL KEVIN ROBERTO", "Rebobinadora 1", "MK"], ["SIMBAÑA VEGA WILLIAM ROLANDO", "Reb. R. Térmicos 1", "SW"], ["ALVARADO CERDA NESTOR WILBER", "Reb. R. Térmicos 1", "AN"], ["HERRERA CASTILLO JOSE FERNANDO", "Reb. R. Térmicos 2", "HJ"], ["ROCHA DELGADO RICARDO RAMIRO", "Reb. R. Térmicos 2", "RR"], ["CISNEROS FIGUEROA MANUEL FELIPE", "Cortadora M.P. 1", "CM"], ["BATTA PINTO KEYSMER JOSE", "Cortadora M.P. 2", "BK"], ["SIMBAÑA VEGA JAIME ULISES", "(no figura en Personal de Calidad)", "SJ"]];
+const PERSONAL = [["ALCIVAR BRAVO CARLOS ALFREDO", "Alistamiento", "AC"], ["GUERRERO BARCIA LUIS FERNANDO", "Alistamiento", "GL"], ["GUAITA GUANOLUISA DARIO JAVIER", "Prensa Digital", "DG"], ["TITUAÑA SANCHEZ JUAN FRANCISCO", "Weigang", "TJ"], ["VALDOSPINO MORA JOFFRE ARIEL", "Weigang", "VA"], ["LOPEZ IMBACUAN MILTON ERNESTO", "Depai 450", "LM"], ["PRADO AVILA HAMILTON BENIGNO", "Depai 450", "PH"], ["MOROCHO CANTUÑA JOSE ANDRES", "Mark Andy 2101", "MJO"], ["COLLAGUAZO QUILUMBA FREDDY FERNANDO", "Mark Andy 2101", "FC"], ["CEDEÑO RODRIGUEZ ELIAS MANUEL", "Sprint 450 8C", "CE"], ["DELGADO CALDERON WALTER ARTURO", "Sprint 450 8C", "DW"], ["CONFORME DE LA CRUZ ALBERTO PASCUAL", "Imp. Rollos Térmicos", "CA"], ["ANGULO BENAVIDES KEVIN GABRIEL", "Imp. Rollos Térmicos", "AK"], ["CACHIPUENDO AMANTA CRISTOPHER XAVIER", "Troq. Plana 1", "CC"], ["SIMBAÑA VEGA WILMER MIGUEL", "Troq. Plana 1", "SM"], ["JIMA MORQUEACHO JONATHAN FABRICIO", "Troq. Plana 1", "JJ"], ["VILLALOBOS GONZALEZ MILTON WLADIMIR", "Troq. Plana 2", "MV"], ["PINTO CALDERON BRYAN STEVEN", "Troq. Rotativa 1", "PB"], ["LOPEZ GUALLO DIEGO GEOVANNY", "Troq. Rotativa 1", "GG"], ["VALAREZO CANDO MARCOS ELIAS", "Troq. Rotativa 2", "VM"], ["ORTIZ LARA JUAN CARLOS", "Troq. Rotativa 2", "OJC"], ["SEMANATE LASLUISA MILTON RAUL", "Troq. Rotativa 3", "SP"], ["JARA CENTENO DIEGO ALEXANDER", "Troq. Rotativa 3", "JD"], ["DUEÑAS HERRERA STALIN JONATHA", "Troq. Rotativa 4", "DS"], ["CRUZ CHISAGUANO EDWIN STEVEN", "Troq. Rotativa 4", "EC"], ["TRONCOSO RODRIGUEZ EDISON ROBERTO", "Troq. Láser", "TE"], ["PILCO TITUAÑA JIMMY CHAYAN", "Rebobinadora 2", "PJ"], ["YANEZ ESPAÑA CARLOS WILFRIDO", "Rebobinadora 1", "YC"], ["MUGMAL MUGMAL KEVIN ROBERTO", "Rebobinadora 1", "MK"], ["SIMBAÑA VEGA WILLIAM ROLANDO", "Reb. R. Térmicos 1", "SW"], ["ALVARADO CERDA NESTOR WILBER", "Reb. R. Térmicos 1", "AN"], ["HERRERA CASTILLO JOSE FERNANDO", "Reb. R. Térmicos 2", "HJ"], ["ROCHA DELGADO RICARDO RAMIRO", "Reb. R. Térmicos 2", "RR"], ["CISNEROS FIGUEROA MANUEL FELIPE", "Cortadora M.P. 1", "CM"], ["BATTA PINTO KEYSMER JOSE", "Cortadora M.P. 2", "BK"], ["SIMBAÑA VEGA JAIME ULISES", "(no figura en Personal de Calidad)", "SJ"], ["LOPEZ LA CRUZ LUIS ANDRES", "Por asignar", "LL"], ["BAUTISTA GUAGUA ERICK DANIEL", "Por asignar", "BE"], ["ROJAS MALDONADO ESTEBAN GABRIEL", "Por asignar", "RE"], ["ROJAS PRECIADO PATRICIO ANTONIO", "Por asignar", "RP"]];
 const FILAS_PROD = 8; // 8 bobinas madre y 16 rollos hijos, como en la hoja
 const MAX_ROLLOS = 100; // con "Agregar fila de rollos" se llega hasta 100 rollos hijos (50 filas)
 const MAX_FILAS_PROD = MAX_ROLLOS / 2;
@@ -430,7 +430,7 @@ function leer() {
     operador: $("operador").value, op: $("op").value.trim(), velocidad: num($("velocidad").value),
     medida: $("medida").value.trim(), setupIni: $("setupIni").value, setupFin: $("setupFin").value,
     horaIni: $("horaIni").value, horaFin: $("horaFin").value,
-    tiempos: TIEMPOS.map((_, i) => EN_HOJA.has(i) ? num($("t" + i).value) : 0), llenado: num($("t" + LLENADO).value),
+    tiempos: TIEMPOS.map((_, i) => EN_HOJA.has(i) ? num($("t" + i).value) : 0), extra: EXTRA_T.map((_, k) => num($("t" + (TIEMPOS.length + k)).value)),
     scrapM: SCRAP.map((_, i) => num($("sm" + i).value)),
     madres: [], hijos: [], cajas: num($("cajas").value), sobrante: num($("sobrante").value),
     // Balance: lo escribe el operador (no se calcula solo).
@@ -446,7 +446,7 @@ function leer() {
   r.ini = r.setupIni || r.horaIni;
   r.min = minutos(r.ini, r.horaFin);
   r.minSetup = minutos(r.setupIni, r.setupFin);
-  r.paro = r.tiempos.reduce((a, b) => a + b, 0) + r.llenado;
+  r.paro = [...r.tiempos, ...r.extra].reduce((a, b) => a + b, 0);
   // Totales de rollos hijo y metros: los escribe el operador (no se suman solos).
   r.rollos = num($("totRollos").value);
   r.metros = num($("totMetros").value);
@@ -462,7 +462,7 @@ function revisar(r) {
   if (falta.length) c.push(["bad", "Falta " + falta.join(", ") + "."]);
   const prod = buscarOP(r.op);
   if (prod && /ANUL/.test(prod.estado)) c.push(["bad", `La OP ${r.op} está anulada.`]);
-  const negativos = [r.velocidad, r.cajas, r.sobrante, r.bal.rec, r.bal.prod, r.bal.desp, r.bal.tot, ...r.tiempos, r.llenado, ...r.scrapM, ...r.hijos.map(h => h.m), ...r.madres.map(b => b.m)].some(v => v < 0);
+  const negativos = [r.velocidad, r.cajas, r.sobrante, r.bal.rec, r.bal.prod, r.bal.desp, r.bal.tot, ...r.tiempos, ...r.extra, ...r.scrapM, ...r.hijos.map(h => h.m), ...r.madres.map(b => b.m)].some(v => v < 0);
   if (negativos) c.push(["bad", "Hay números negativos. Revisa las casillas."]);
   // Horas y balance: avisan en rojo pero dejan enviar; el Excel y el PDF los marcan en rojo.
   if (r.ini && r.horaFin && !r.min) c.push(["bad", r.setupIni ? "La hora de fin es igual al inicio del set up." : "La hora de fin es igual a la hora de inicio.", "horas"]);
@@ -474,7 +474,7 @@ function revisar(r) {
   // Tiempos improductivos: solo minutos enteros (ej. 30, no 0,5 ni 1:30) y ninguno mayor que el tiempo trabajado.
   const tiemposRaros = [...document.querySelectorAll("#causasTiempo input")].filter(i => i.value.trim() !== "" && !/^\d+$/.test(i.value.trim()));
   if (tiemposRaros.length) c.push(["bad", "Escribe los tiempos improductivos en minutos enteros (ej. 30), sin decimales ni horas."]);
-  const largo = [...r.tiempos, r.llenado].find(t => r.min && t > r.min);
+  const largo = [...r.tiempos, ...r.extra].find(t => r.min && t > r.min);
   if (largo) c.push(["bad", `Un tiempo improductivo (${fmt(largo)} min) es mayor que todo el tiempo trabajado (${fmt(r.min)} min). Revisa que esté en minutos.`]);
   // Se compara lo que escribió el operador: Recibido contra Total.
   if (r.bal.rec && r.bal.tot) {
@@ -519,10 +519,10 @@ function filaExcel(r) {
     ...r.scrapM, // AR..BG
     // BJ tiempo perdido = tiempos improductivos; BK tiempo real ocupado = BI - BJ (la fórmula de BASE).
     r.scrap, P, r.paro, P - r.paro, "", "", "", obs, // BH..BO
-    "", "", r.llenado || "" // BP, BQ (rendimiento y OEE los calcula el script); BR llenado de datos (min)
+    "", "", r.extra[0] || "", r.extra[1] || "" // BP, BQ (rendimiento y OEE los calcula el script); BR llenado de datos, BS cortes de luz (min)
   ];
 }
-const COLS = 70; // A..BR
+const COLS = 71; // A..BS
 
 // ---------- guardar ----------
 function guardados() { return store.get("etimet.corte.reportes", []); }
@@ -627,7 +627,7 @@ function setVals(v) {
   $("turno").value = turno; if ($("turno").selectedIndex < 0) $("turno").selectedIndex = 0;
   [["balRec", "rec"], ["balProd", "prod"], ["balDesp", "desp"], ["balTot", "tot"]].forEach(([id, k]) => { $(id).value = v.bal?.[k] || ""; });
   TIEMPOS.forEach((_, i) => { if (EN_HOJA.has(i)) $("t" + i).value = v.tiempos?.[i] || ""; });
-  $("t" + LLENADO).value = v.llenado || "";
+  EXTRA_T.forEach((_, k) => { $("t" + (TIEMPOS.length + k)).value = v.extra?.[k] ?? (k === 0 ? v.llenado : "") ?? ""; });
   $("totRollos").value = v.rollos || ""; $("totMetros").value = v.metros || "";
   SCRAP.forEach((_, i) => { $("sm" + i).value = v.scrapM?.[i] || ""; });
   // Filas de producción: las 8 de la hoja más las que hagan falta para los rollos guardados (máx. 100).
